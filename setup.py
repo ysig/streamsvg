@@ -1,13 +1,13 @@
 from distutils.core import setup
 setup(
-  name = 'streamfig',
-  packages = ['streamfig'],
+  name = 'streamsvg',
+  packages = ['streamsvg'],
   version = '1.1.1',
-  description = 'Small library to draw stream graphs into FIG format',
-  author = 'Tiphaine Viard',
-  author_email = 'tiphaine.viard@riken.jp',
-  url = 'https://github.com/TiphaineV/streamfig', 
-  download_url = 'https://github.com/TiphaineV/streamfig/archive/1.1.1.tar.gz', 
-  keywords = ['stream graphs', 'visualization', 'temporal networks', 'xfig'], 
+  description = 'Small library to draw stream graphs into SVG format',
+  author = 'Ioannis SIglidis',
+  author_email = 'yiannis.siglidis@lip6.fr',
+  url = 'https://github.com/ysig/streamsvg',
+  keywords = ['stream graphs', 'visualization', 'temporal networks', 'svg'], 
   classifiers = [],
+  install_requires=['svgwrite >= 1.1.9']
 )

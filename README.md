@@ -1,6 +1,7 @@
-# streamfig
-Python class to generate describe stream graphs in fig format.
+# streamsvg
 
-Documentation is in doc/, and some code examples are in examples/ . Below is the result from all the examples.
+Python package for printing linkstreams in SVG format
 
-![](http://tiphaineviard.com/all_examples.png)
+##Warning: Prototype!!
+
+Forked from [streamfig](https://github.com/TiphaineV/streamfig/tree/master/streamfig).

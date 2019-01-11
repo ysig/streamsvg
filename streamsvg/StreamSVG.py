@@ -31,7 +31,7 @@ def drange(start, stop, step):
         yield r
         r += step
 
-class StreamSVG(object):
+class Drawing(object):
     """
         Initializes a stream graph drawing.
 
@@ -58,8 +58,6 @@ class StreamSVG(object):
 
     _time_unit = 500
     _node_unit = 12
-    _offset_x = 3450
-    _offset_y = 2250
     _node_sep = _node_unit/4
     
     _num_node_intervals = 0
@@ -74,6 +72,7 @@ class StreamSVG(object):
     _font_size = 10
     _font_family = 'serif'
     _font_color = 'black'
+    _mark_size = 2
 
     _nodes = {}
     _nodes_class = {}
@@ -85,6 +84,7 @@ class StreamSVG(object):
     _tick_font_family = 'serif'
     _tick_font_size = 5
     _tick_font_color = 'black'
+    __add_tm = []
 
     def __init__(self, name, alpha=0.0, omega=10.0, time_width=5, discrete=0, directed=False):
         #print("""#FIG 3.2  Produced by xfig version 3.2.5b\n\
@@ -104,6 +104,8 @@ class StreamSVG(object):
         self._discrete = discrete
         self._directed = directed
 
+        self._offset_x = self._font_size + self._tick_font_size
+        self._offset_y = self._tick_font_size
         self.linetype = 2
 
         # Useful predefined colors
@@ -215,14 +217,14 @@ class StreamSVG(object):
         nu = self.dwg.add(self.dwg.g(class_="node_"+u))
         self._nodes_class[u] = nu
         y = (self._node_cpt-1) * (self._node_unit + self._node_sep)
-        nu.add(self.dwg.text(str(u), insert=(0, self._node_unit/2 + self._font_size/2 - 2 + y), font_family=self._font_family, font_size=self._font_size, fill=self._font_color))
-        nu.add(self.dwg.rect(insert=(self._font_size, y), size=(self._omega*self._time_unit, self._node_unit), fill=color))
+        nu.add(self.dwg.text(str(u), insert=(self._offset_x - self._font_size, self._node_unit/2 + self._font_size/2 - 2 + y + self._offset_y), font_family=self._font_family, font_size=self._font_size, fill=self._font_color))
+        nu.add(self.dwg.rect(insert=(self._offset_x, y+self._offset_y), size=(self._omega*self._time_unit, self._node_unit), fill=color))
 
         if len(times) == 0:
-            nu.add(self.dwg.line(start=(self._font_size, self._node_unit/2+y), end=(self._omega*self._time_unit+self._font_size,  self._node_unit/2+y), stroke_width="1", stroke_dasharray="1 1", stroke='black'))#(self._omega*self._time_unit)
+            nu.add(self.dwg.line(start=(+self._offset_x, self._node_unit/2+y+self._offset_y), end=(self._omega*self._time_unit++self._offset_x,  self._node_unit/2+y+self._offset_y), stroke_width="1", stroke_dasharray="1 1", stroke='black'))#(self._omega*self._time_unit)
         else:
             for (i,j) in times:
-                nu.add(self.dwg.line(start=(self._font_size+i*self._time_unit, self._node_unit/2+y), end=(self._font_size+j*self._time_unit, self._node_unit/2+y), stroke_width="1", stroke_dasharray="1 5", stroke='black'))
+                nu.add(self.dwg.line(start=(self._offset_x+i*self._time_unit, self._node_unit/2+y+self._offset_y), end=(self._offset_x+j*self._time_unit, self._node_unit/2+y+self._offset_y), stroke_width="1", stroke_dasharray="1 5", stroke='black'))
 
     def addLink(self, u, v, b, e, curving=0.0, color='black', height=0.5, width=2):
         """
@@ -276,58 +278,32 @@ class StreamSVG(object):
             arrow_type = "0 0"
 
         for i in drange(b,e, self._discrete):
-            # Draw circles for u and v
-            print("1 3 0 " + str(width) + " " + str(color) + " " + str(color) + " 49 -1 20 0.000 1 0.0000 " + str(self._offset_x + int(i * self._time_unit)) + " " + str(self._offset_y + self._nodes[u]*self._node_unit) + " 45 45 -6525 -2025 -6480 -2025")
-            print("1 3 0 " + str(width) + " " + str(color) + " " + str(color) + " 49 -1 20 0.000 1 0.0000 " + str(self._offset_x + int(i * self._time_unit)) + " " + str(self._offset_y + self._nodes[v]*self._node_unit) + " 45 45 -6525 -2025 -6480 -2025")
-            
-            # Link them
-            x1, y1 = self._offset_x + int(i * self._time_unit), self._offset_y + self._nodes[u]*self._node_unit
-            x2 = self._offset_x + int((i + curving) * self._time_unit)
-            y2 = int((self._offset_y + self._nodes[v]*self._node_unit) - 0.5 * (self._nodes[v]-self._nodes[u]) * self._node_unit) 
-            x3 = self._offset_x + int(i * self._time_unit)
-            y3 = self._offset_y + self._nodes[v]*self._node_unit
-
-            if self._directed:
-                dir_arg1 = "2"
-                dir_arg2 = "1.000"
-            else:
-                dir_arg1 = "0"
-                dir_arg2 = "-1.000"
-
-            sys.stdout.write("3 2 0 " + str(width) + " " + str(color) + " 7 50 -1 -1 0.000 0 " + str(arrow_type) + " 3\n")
-            # arrow type
-            if self._directed:
-                sys.stdout.write("1 1 3.00 90.00 150.00\n")
-            sys.stdout.write("%s %s %s %s %s %s\n" % (x1, y1, x2, y2, x3, y3))
-            sys.stdout.write("0.000 " + str(dir_arg2) + " 0.000\n")
-
-            numnodes = abs(self._nodes[u] - self._nodes[v])
-
+            pass
 
     def __addContinuousLink(self, u, v, b, e, curving=0.0, color='black', height=0.5, width=1):
         # Draw circles for u and v
         luv = self.dwg.add(self.dwg.g(class_="link_" + str(u) + "_" + str(v)))
         ucpt = min(self._nodes[u], self._nodes[v])
         vcpt = max(self._nodes[u], self._nodes[v])
-        yu = (ucpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2
+        yu = (ucpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2 
         yv = (vcpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2
-        x_off = b*self._time_unit+self._font_size
-        luv.add(self.dwg.circle(center=(x_off, yu), r=self._node_unit/5, fill=color))
-        luv.add(self.dwg.circle(center=(x_off, yv), r=self._node_unit/5, fill=color))
+        x_off = b*self._time_unit+self._offset_x
+        luv.add(self.dwg.circle(center=(x_off, yu + self._offset_y), r=self._node_unit/5, fill=color))
+        luv.add(self.dwg.circle(center=(x_off, yv + self._offset_y), r=self._node_unit/5, fill=color))
         
-        xm = (b + curving) * self._time_unit + self._font_size
-        ym = (yu + yv)*height 
+        xm = (b + curving) * self._time_unit + self._offset_x
+        ym = (yu + yv)*height
         if curving > 0.:
-            luv.add(self.dwg.path(d=("M" + str(x_off) + " " + str(yu) +
-                                     " Q" + " " + str(xm) + " " + str(ym) + " " + str(x_off) + " " + str(yv)),
+            luv.add(self.dwg.path(d=("M" + str(x_off) + " " + str(yu + self._offset_y) +
+                                     " Q" + " " + str(xm) + " " + str(ym + self._offset_y) + " " + str(x_off) + " " + str(yv + self._offset_y)),
                                   stroke_width=width,
                                   stroke=color,
                                   fill_opacity="0."))
         else:
-            luv.add(self.dwg.line(start=(x_off, yu), end=(x_off, yv), stroke_width=width, stroke=color))
+            luv.add(self.dwg.line(start=(x_off, yu + self._offset_y), end=(x_off, yv + self._offset_y), stroke_width=width, stroke=color))
 
         # Duration
-        luv.add(self.dwg.line(start=(xm, ym), end=((e) * self._time_unit + self._font_size, ym), stroke_width=width, stroke=color))
+        luv.add(self.dwg.line(start=(xm, ym + self._offset_y), end=(e * self._time_unit + self._offset_x, ym + self._offset_y), stroke_width=width, stroke=color))
 
     def addNodeCluster(self, u, times=[], color='blue', width=None):
         """
@@ -360,14 +336,14 @@ class StreamSVG(object):
 
         nu = self._nodes_class[u]
         node_cpt = self._nodes[u]
-        y = (node_cpt-1) * (self._node_unit + self._node_sep)
+        y = (node_cpt-1) * (self._node_unit + self._node_sep) + self._offset_y
 
         if len(times) == 0:
             times = [(self._alpha, self._omega)]
 
         #width, j-i
         for (i,j) in times:
-            nu.add(self.dwg.rect(insert=(self._font_size + i*self._time_unit, y + self._node_unit/2-margin), size=((j-i)*self._time_unit, width), fill=color, fill_opacity="0.4"))
+            nu.add(self.dwg.rect(insert=(self._offset_x + i*self._time_unit, y + self._node_unit/2-margin), size=((j-i)*self._time_unit, width), fill=color, fill_opacity="0.4"))
             
     def addParameter(self, letter, value, color=0, width=1):
         """
@@ -413,20 +389,18 @@ class StreamSVG(object):
         self._totalval_parameters += value
         self._num_parameters += 1
 
-    def addNodeIntervalMark(self, u, v, color=0, width=1):
-        if color in self._colors:
-            color = self._colors[color]
+    def addNodeIntervalMark(self, u, v, color='black', width=1):
+        ucpt = min(self._nodes[u], self._nodes[v])
+        vcpt = max(self._nodes[u], self._nodes[v])
+        yu = (ucpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2 
+        yv = (vcpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2
+        x_off = self._offset_x/10
 
-        pos_segment_x = self._offset_x - (150 * self._num_node_intervals) - 600
+        self.dwg.add(self.dwg.line(start=(self._tick_length + x_off, yu + self._offset_y), end=(self._tick_length + x_off, yv + self._offset_y), stroke_width=width, stroke=color))
+        self.dwg.add(self.dwg.line(start=(x_off, yu + self._offset_y), end=(2*self._tick_length + x_off, yu + self._offset_y), stroke_width=width, stroke=color))
+        self.dwg.add(self.dwg.line(start=(x_off, yv + self._offset_y), end=(2*self._tick_length + x_off, yv + self._offset_y), stroke_width=width, stroke=color))
 
-        print("2 1 " + str(color) + " " + str(width) + " 0 7 50 -1 -1 0.000 0 0 -1 1 1 2")
-        print("13 1 1.00 60.00 120.00")
-        print("13 1 1.00 60.00 120.00")
-        print(str(pos_segment_x) + " " + str(self._offset_y + self._nodes[u] * self._node_unit) + " " + str(pos_segment_x) + " " + str(self._offset_y + self._nodes[v] * self._node_unit))
-        self._num_node_intervals += 1
-
-
-    def addTimeNodeMark(self, t, v, color=0, width=2, depth=49):
+    def addTimeNodeMark(self, t, v, color='black', width=2, opacity='1.0'):
         """
             Adds a mark (a cross) at a given node and time.
 
@@ -446,23 +420,15 @@ class StreamSVG(object):
 
             >>> d.addTimeNodeMark(2, "u", color=11, width=3)
         """
-        if color in self._colors:
-            color = self._colors[color]
-
-        print("2 1 0 "+ str(width) + " " + str(color) + " 7 " + str(depth) + " -1 -1 0.000 0 0 -1 0 0 2")
-        print(str(self._offset_x + int(t * self._time_unit) - 50 ) + " " + str(self._offset_y + self._nodes[v]*self._node_unit - 50) + " " + str(self._offset_x + int(t * self._time_unit) + 50 ) + " " + str(self._offset_y + self._nodes[v]*self._node_unit + 50))
-
-        print("2 1 0 "+ str(width) + " " + str(color) + " 7 " + str(depth) + " -1 -1 0.000 0 0 -1 0 0 2")
-        print(str(self._offset_x + int(t * self._time_unit) - 50 ) + " " + str(self._offset_y + self._nodes[v]*self._node_unit + 50) + " " + str(self._offset_x + int(t * self._time_unit) + 50 ) + " " + str(self._offset_y + self._nodes[v]*self._node_unit - 50))
-
-    def addTimeIntervalMark(self, b, e, color=0, width=1):
-        pos_segment_y = self._offset_y + (self._nodes[self._first_node] * self._node_unit) - (100 * self._num_time_intervals) - 200
-
-        print("2 1 0 1 0 7 50 -1 -1 0.000 0 0 -1 1 1 2")
-        print("13 1 1.00 60.00 120.00")
-        print("13 1 1.00 60.00 120.00")
-        print(str(self._offset_x + b * self._time_unit) + " " + str(pos_segment_y) + " " + str(self._offset_x + (e * self._time_unit)) + " " + str(pos_segment_y))
-        self._num_time_intervals += 1
+        cx = (t * self._time_unit) + self._offset_x + 0.5
+        cy = (self._nodes[v]-1) * (self._node_unit + self._node_sep) + self._node_unit/2 + self._offset_y
+        a = "M " + str(cx - self._mark_size) + "," + str(cy - self._mark_size)
+        b = "L " + str(cx + self._mark_size) + "," + str(cy + self._mark_size)
+        c = "M " + str(cx + self._mark_size) + "," + str(cy - self._mark_size)
+        d = "L " + str(cx - self._mark_size) + "," + str(cy + self._mark_size)
+        self.dwg.add(self.dwg.path(d=" ".join([a, b, c, d]),
+                                   fill = "none",
+                                   stroke_width=width, stroke=color, stroke_opacity=opacity))
 
     def addPath(self, path, start, end, gamma=0, color='yellow', opacity='0.7', width=1, depth=51):
         """
@@ -494,19 +460,19 @@ class StreamSVG(object):
         if not len(path):
             return
 
-        x_off = self._font_size
+        x_off = self._offset_x
         t, u, _ = path[0]
         point = []
         if t!=start:
             ucpt = self._nodes[u]
-            yu = (ucpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2
+            yu = (ucpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2 + self._offset_y
             point.append(((start * self._time_unit) + x_off, yu))
 
         for tk, u, v in path:
             ucpt = self._nodes[u]
             vcpt = self._nodes[v]
-            yu = (ucpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2
-            yv = (vcpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2
+            yu = (ucpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2 + self._offset_y
+            yv = (vcpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2 + self._offset_y
             xu = (tk * self._time_unit) + x_off
             if tk < end:
                 xv = (tk * self._time_unit + gamma) + x_off
@@ -516,7 +482,7 @@ class StreamSVG(object):
             point.append((xv, yv))
         t, _, v = path[-1]
         vcpt = self._nodes[v]
-        yv = (vcpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2            
+        yv = (vcpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2 + self._offset_y         
         if t != end:
             point.append(((end * self._time_unit) + x_off, yv))
 
@@ -567,10 +533,16 @@ class StreamSVG(object):
         nctv = self._nodes[v]
         t_pos = (nctu-1) * (self._node_unit + self._node_sep)
         d_pos = (nctv-1) * (self._node_unit + self._node_sep)
-        self.dwg.add(self.dwg.rect(insert=(self._font_size+b*self._time_unit, t_pos+self._node_unit/2-0.5), size=((e-b)*self._time_unit, d_pos+1), fill=color, stroke=bordercolor, stroke_width=borderwidth, fill_opacity=opacity))
+        self.dwg.add(self.dwg.rect(insert=(self._offset_x+b*self._time_unit, t_pos+self._node_unit/2-0.5+self._offset_y), size=((e-b)*self._time_unit, d_pos+1), fill=color, stroke=bordercolor, stroke_width=borderwidth, fill_opacity=opacity))
 
+    def __addTime(self, t, label="", width=1, color='black', opacity=0.8):
+        y = (self._node_cpt) * (self._node_unit + self._node_sep) + self._offset_y
+        x = t*self._time_unit + 0.5 + self._offset_x
+        self.dwg.add(self.dwg.line(start=(x, self._offset_y), end=(x, y), stroke_width=str(width), stroke_dasharray="1 1", stroke='black', stroke_opacity=str(opacity)))
+        if label != "" or label is None:
+            self.dwg.add(self.dwg.text(str(label), insert=(x-2.0, self._offset_y - 1.0), font_family=self._tick_font_family, font_size=self._tick_font_size))
 
-    def addTime(self, t, label="", width=1, font=12, color=0):
+    def addTime(self, t, label="", width=1, color='black', opacity=0.5):
         """
             Adds a vertical dotted line at a given time.
 
@@ -585,22 +557,12 @@ class StreamSVG(object):
             >>> # Adds a vertical line labelled "t" at time 2
             >>> d.addTime(2, "t")
         """
+        self.__add_tm.append(([t], dict(label=label, width=width, color=color, opacity=opacity)))
+        
+    def addTimeLine(self, ticks=1, marks=None):
+        self.__add_tl = dict(ticks=ticks, marks=marks)
 
-        if self._num_time_intervals == 0:
-            self._num_time_intervals = 1
-
-        if color in self._colors:
-            color = self._colors[color]
-
-        linetype = 1
-
-        print("""2 1 """ + str(linetype) + """ """ + str(width) + """  """ + str(color) + """ 7 50 -1 -1 2.000 0 0 7 0 0 2\n \
-          """ + str(self._offset_x + int(t * self._time_unit)) + """ """ + str(self._offset_y + int(2 * self._node_unit - 150)) + """ """ + str(self._offset_x + int(t * self._time_unit)) + """ """ + str(self._offset_y + int(self._node_cpt * self._node_unit + 300)))
-
-        # Add label if any
-        print("4 0 " + str(color) + " 50 -1 0 " + str(font) + " 0.0000 4 135 120 " + str(self._offset_x + int(t * self._time_unit) - (2 * font * len(label))) + " " + str(self._offset_y - 175 + int(2 * self._node_unit)) + " " + str(label) + "\\001")
-
-    def _addTimeLine(self, ticks=1, marks=None):
+    def __addTimeLine(self, ticks=1, marks=None):
         """
             Adds a time line at the bottom of the stream graph.
 
@@ -646,17 +608,14 @@ class StreamSVG(object):
         else:
             start, end = self._alpha, self._omega
 
-        y = (self._node_cpt) * (self._node_unit + self._node_sep)
-        # create a new marker object
-        marker = self.dwg.marker(insert=(5,5), size=(10,10))
+        y = (self._node_cpt) * (self._node_unit + self._node_sep) + self._offset_y
 
-        # red point as marker
-        marker.add(self.dwg.circle((5, 5), r=5, fill='red'))
-        line = self.dwg.add(self.dwg.line(start=(self._font_size, y), end=(self._omega*self._time_unit+self._font_size,  y), stroke_width="1", stroke='black', marker_end=self.arrow_marker.get_funciri()))
+        line = self.dwg.add(self.dwg.line(start=(self._offset_x, y), end=(self._omega*self._time_unit+self._offset_x,  y), stroke_width="1", stroke='black', marker_end=self.arrow_marker.get_funciri()))
         for t, v in vals:
-            x = t*self._time_unit + self._font_size + 0.5
+            x = t*self._time_unit + self._offset_x + 0.5
             self.dwg.add(self.dwg.line(start=(x, y), end=(x, y + self._tick_length), stroke_width=str(self._tick_width), stroke='black'))
             self.dwg.add(self.dwg.text(str(v), insert=(x-self._tick_font_size/4 - 0.2, y + self._tick_length + self._tick_font_size - 0.5), font_family=self._tick_font_family, font_size=self._tick_font_size, fill=self._tick_font_color))
+        self.dwg.add(self.dwg.text('time', insert=(self._omega*self._time_unit + self._offset_x, y + self._tick_length + self._tick_font_size - 0.5), font_family=self._tick_font_family, font_size=self._tick_font_size*0.8, fill=self._tick_font_color))
         # set marker (start, mid and end markers are the same)
 
     def __del__(self):
@@ -664,9 +623,11 @@ class StreamSVG(object):
         #self.addRectangle(self._first_node, self._first_node, self._alpha, self._omega, width=300,depth=60, color=7)
         pass
 
-    def save(self, addTimeLine=None):
-        if addTimeLine is not None:
-            self._addTimeLine(**addTimeLine)
+    def save(self):
+        if hasattr(self, '__add_tl') is not None:
+            self.__addTimeLine(**self.__add_tl)
+        for args, kargs in self.__add_tm:
+            self.__addTime(*args, **kargs) 
         self.dwg.save() 
 
 # main
@@ -674,7 +635,7 @@ if __name__ == '__main__':
 
     # s = Drawing()
     # s = Drawing(alpha=0, omega=10)
-    s = StreamSVG("out.svg", alpha=0, omega=10)
+    s = Drawing("out.svg", alpha=0, omega=10)
 
     s.addColor("grey", "#888888")
     s.addColor("red", "#ff0000")
@@ -698,5 +659,9 @@ if __name__ == '__main__':
     s.addLink("u", "v", 5, 7)
     s.addLink("v", "x", 3, 4)
 
-    s.save(addTimeLine=dict(ticks=2, marks=[(2, "a"), (2.5, "c"), (5, "t"), (6, "b")]))
+    s.addTime(4, label="u", width=1, color='black')    
+    s.addTimeLine(ticks=2, marks=[(2, "a"), (2.5, "c"), (5, "t"), (6, "b")])
+    s.addTimeNodeMark(4, "y", width=0.5)
+    s.addNodeIntervalMark("u", "x", color='black')
+    s.save()
     #s.save(addTimeLine=dict(ticks=2))
