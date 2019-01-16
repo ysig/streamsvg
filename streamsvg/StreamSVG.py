@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-# TODO
-# Nettoyage vieux code / Commentaires code
-# Documentation
-# Remplacer les print(...\n)
-# Gestion des erreurs (noeud non ajoute...)
 
 import sys
 import svgwrite
+import os.path
+import math
 
 def drange(start, stop, step):
     """
@@ -57,7 +54,7 @@ class Drawing(object):
     _discrete = -1
 
     _time_unit = 500
-    _node_unit = 12
+    _node_unit = 30
     _node_sep = _node_unit/4
     
     _num_node_intervals = 0
@@ -67,12 +64,10 @@ class Drawing(object):
     _totalval_parameters = 0
 
     _first_node = ""
-    _tick_length = 1
-    _tick_width = 1
     _font_size = 10
     _font_family = 'serif'
     _font_color = 'black'
-    _mark_size = 2
+    _time_unit = 40
 
     _nodes = {}
     _nodes_class = {}
@@ -82,30 +77,34 @@ class Drawing(object):
     _color_cpt = 31
     _directed = False
     _tick_font_family = 'serif'
-    _tick_font_size = 5
+    _tick_font_size = _node_unit/2
+    _tick_width = _tick_font_size/10
+    _tick_length = _tick_font_size/5
     _tick_font_color = 'black'
+    _mark_size = _node_unit/10
     __add_tm = []
+    __add_tl = None
 
-    def __init__(self, name, alpha=0.0, omega=10.0, time_width=5, discrete=0, directed=False):
-        #print("""#FIG 3.2  Produced by xfig version 3.2.5b\n\
-#Landscape\n\
-#Center\n\
-#Inches\n\
-#Letter\n\
-#100.00\n\
-#Single\n\
-#-2\n\
-#1200 2\n""")
-#(omega*time_width+15, 1000),
+    def __init__(self, name=None, alpha=0.0, omega=10.0, discrete=0, directed=False):
+        if name is None:
+            if str(sys.argv[0].split('.')[-1]) == 'py':
+                heading = '.'.join(sys.argv[0].split('.')[:-1])
+            else:
+                heading = sys.argv[0]
+            name = heading + ".svg"
+            cnt = 1
+            while os.path.exists(name):
+                name = heading + "(" + str(cnt) + ").svg"
+                cnt += 1
+
         self.dwg = svgwrite.Drawing(name, debug=True)
         self._alpha = float(alpha)
         self._omega = float(omega)
-        self._time_unit = time_width
         self._discrete = discrete
         self._directed = directed
 
         self._offset_x = self._font_size + self._tick_font_size
-        self._offset_y = self._tick_font_size
+        self._offset_y = self._tick_font_size + self._tick_font_size + self._tick_width
         self.linetype = 2
 
         # Useful predefined colors
@@ -149,7 +148,7 @@ class Drawing(object):
 
         #print("0 " + str(self._color_cpt) + " " + str(hex))
 
-    def addNode(self, u, times=[], color=0, linetype=None):
+    def addNode(self, u, times=[], color='black', rectangle_color='white', linetype=None):
         """
             Adds a new node to the stream graph.
 
@@ -172,7 +171,7 @@ class Drawing(object):
         if self._discrete > 0:
             self.__addDiscreteNode(u, times, color)
         else:
-            self.__addContinuousNode(u, times, color, linetype)
+            self.__addContinuousNode(u, times, color, rectangle_color,linetype)
 
     def __addDiscreteNode(self, u, times=[], color="grey", width=1):
 
@@ -199,15 +198,13 @@ class Drawing(object):
 
 
 
-    def __addContinuousNode(self, u, times=[], color="white", linetype=None):
+    def __addContinuousNode(self, u, times=[], color="black", rectangle_color='none', linetype=None):
         """ nodeId : identifiant du noeud
             times : suite d'intervalles de temps ou le noeud est actif
         """
 
         if linetype is None:
             linetype = self.linetype
-
-        color = self._colors.get(color, "white")
 
         if self._node_cpt == 1:
             self._first_node = u
@@ -217,14 +214,14 @@ class Drawing(object):
         nu = self.dwg.add(self.dwg.g(class_="node_"+u))
         self._nodes_class[u] = nu
         y = (self._node_cpt-1) * (self._node_unit + self._node_sep)
-        nu.add(self.dwg.text(str(u), insert=(self._offset_x - self._font_size, self._node_unit/2 + self._font_size/2 - 2 + y + self._offset_y), font_family=self._font_family, font_size=self._font_size, fill=self._font_color))
-        nu.add(self.dwg.rect(insert=(self._offset_x, y+self._offset_y), size=(self._omega*self._time_unit, self._node_unit), fill=color))
+        nu.add(self.dwg.text(str(u), insert=(self._offset_x - self._font_size, self._node_unit/2 + self._font_size/2 - 2 + y + self._offset_y), font_family=self._font_family, font_size=self._font_size, fill=color))
+        nu.add(self.dwg.rect(insert=(self._offset_x, y+self._offset_y), size=(self._omega*self._time_unit, self._node_unit), fill=rectangle_color))
 
         if len(times) == 0:
-            nu.add(self.dwg.line(start=(+self._offset_x, self._node_unit/2+y+self._offset_y), end=(self._omega*self._time_unit++self._offset_x,  self._node_unit/2+y+self._offset_y), stroke_width="1", stroke_dasharray="1 1", stroke='black'))#(self._omega*self._time_unit)
+            nu.add(self.dwg.line(start=(+self._offset_x, self._node_unit/2+y+self._offset_y), end=(self._omega*self._time_unit++self._offset_x,  self._node_unit/2+y+self._offset_y), stroke_width="1", stroke_dasharray="1 1", stroke=color))#(self._omega*self._time_unit)
         else:
             for (i,j) in times:
-                nu.add(self.dwg.line(start=(self._offset_x+i*self._time_unit, self._node_unit/2+y+self._offset_y), end=(self._offset_x+j*self._time_unit, self._node_unit/2+y+self._offset_y), stroke_width="1", stroke_dasharray="1 5", stroke='black'))
+                nu.add(self.dwg.line(start=(self._offset_x+i*self._time_unit, self._node_unit/2+y+self._offset_y), end=(self._offset_x+j*self._time_unit, self._node_unit/2+y+self._offset_y), stroke_width="1", stroke_dasharray="1 5", stroke=color))
 
     def addLink(self, u, v, b, e, curving=0.0, color='black', height=0.5, width=2):
         """
@@ -285,25 +282,33 @@ class Drawing(object):
         luv = self.dwg.add(self.dwg.g(class_="link_" + str(u) + "_" + str(v)))
         ucpt = min(self._nodes[u], self._nodes[v])
         vcpt = max(self._nodes[u], self._nodes[v])
-        yu = (ucpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2 
-        yv = (vcpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2
+        yu = (ucpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2 + self._offset_y 
+        yv = (vcpt-1) * (self._node_unit + self._node_sep) + self._node_unit/2 + self._offset_y
         x_off = b*self._time_unit+self._offset_x
-        luv.add(self.dwg.circle(center=(x_off, yu + self._offset_y), r=self._node_unit/5, fill=color))
-        luv.add(self.dwg.circle(center=(x_off, yv + self._offset_y), r=self._node_unit/5, fill=color))
+        luv.add(self.dwg.circle(center=(x_off, yu), r=self._node_unit/5, fill=color))
+        luv.add(self.dwg.circle(center=(x_off, yv), r=self._node_unit/5, fill=color))
         
         xm = (b + curving) * self._time_unit + self._offset_x
-        ym = (yu + yv)*height
+        ym = (yu + yv)*height + self._offset_y*(1-2*height)
         if curving > 0.:
-            luv.add(self.dwg.path(d=("M" + str(x_off) + " " + str(yu + self._offset_y) +
-                                     " Q" + " " + str(xm) + " " + str(ym + self._offset_y) + " " + str(x_off) + " " + str(yv + self._offset_y)),
+            luv.add(self.dwg.path(d=("M" + str(x_off) + " " + str(yu) +
+                                     " Q" + " " + str(xm) + " " + str(ym) + " " + str(x_off) + " " + str(yv)),
                                   stroke_width=width,
                                   stroke=color,
                                   fill_opacity="0."))
+            if yu + yv < 2*ym:
+                t = - (math.sqrt((yu - ym)*(ym - yv)) - yu + ym)/(yu - 2*ym + yv)
+            elif yu + yv > 2*ym:
+                t = (math.sqrt((yu - ym)*(ym - yv)) + yu - ym)/(yu - 2*ym + yv)
+            else:
+                t = 0.5
+            assert 0 <= t <= 1
+            xm = x_off*((1 - t)**2 + t**2) + 2*t*(1-t)*xm      
         else:
-            luv.add(self.dwg.line(start=(x_off, yu + self._offset_y), end=(x_off, yv + self._offset_y), stroke_width=width, stroke=color))
+            luv.add(self.dwg.line(start=(x_off, yu), end=(x_off, yv), stroke_width=width, stroke=color))
 
         # Duration
-        luv.add(self.dwg.line(start=(xm, ym + self._offset_y), end=(e * self._time_unit + self._offset_x, ym + self._offset_y), stroke_width=width, stroke=color))
+        luv.add(self.dwg.line(start=(xm, ym), end=(e * self._time_unit + self._offset_x, ym), stroke_width=width, stroke=color))
 
     def addNodeCluster(self, u, times=[], color='blue', width=None):
         """
@@ -345,7 +350,7 @@ class Drawing(object):
         for (i,j) in times:
             nu.add(self.dwg.rect(insert=(self._offset_x + i*self._time_unit, y + self._node_unit/2-margin), size=((j-i)*self._time_unit, width), fill=color, fill_opacity="0.4"))
             
-    def addParameter(self, letter, value, color=0, width=1):
+    def addParameter(self, start, end, letter, value, color='black', width=1):
         """
             Adds a parameter (like Delta=2). Multiple parameters will be placed at the top of the drawing, on each other's side 
 
@@ -364,30 +369,16 @@ class Drawing(object):
             >>> # Adds a parameter delta with value 3
             >>> d.addParameter("d", 3)
         """
-
-        if color in self._colors:
-            color = self._colors[color]
-
-        #?Place at top? Confusing with time intervals...
-        pos_segment_y = self._offset_y + (self._nodes[self._first_node] * self._node_unit) - (150 * self._num_time_intervals) - 400
-        # Place at bottom instead? Then needs to be written last.
-        # pos_segment_y = self._offset_y + self._node_cpt * self._node_unit + 2*self._node_unit
-
-        if self._num_parameters == 0:
-            paramoffset = 0
-        else:
-            paramoffset = 200
-
-        print("2 1 " + str(color) + " " + str(width) + " 0 7 50 -1 -1 0.000 0 0 -1 1 1 2")
-        print("13 1 1.00 60.00 120.00")
-        print("13 1 1.00 60.00 120.00")
-        print(str(self._offset_x + (self._totalval_parameters * self._time_unit  + (self._num_parameters * paramoffset))) + " " + str(pos_segment_y) + " " + str(self._offset_x + int(value * self._time_unit) + (self._totalval_parameters * self._time_unit + (self._num_parameters * paramoffset))) + " " + str(pos_segment_y))
-
-        valtocenter = int(value * self._time_unit / 2) - (200 + (50 * max(int(value) - 2, 0))) 
-
-        print("4 0 0 50 -1 32 14 0.0000 4 180 375 " + str(self._offset_x + (self._totalval_parameters * self._time_unit + int(self._num_parameters * paramoffset)) + valtocenter)  + " " + str(pos_segment_y - 150)  + " " + str(letter) + " = " + str(value) + "\\001")
-        self._totalval_parameters += value
-        self._num_parameters += 1
+        ts = start * self._time_unit + self._offset_x + 0.5
+        tf = end * self._time_unit + self._offset_x + 0.5
+        y_off = self._offset_y - self._node_sep - self._tick_font_size/2
+        
+        t = str(letter) + " = " + str(value)
+        
+        self.dwg.add(self.dwg.line(start=(ts, y_off), end=(tf, y_off), stroke_width=width, stroke=color))
+        self.dwg.add(self.dwg.line(start=(ts, self._tick_length + y_off), end=(ts, y_off - self._tick_length), stroke_width=width, stroke=color))
+        self.dwg.add(self.dwg.line(start=(tf, self._tick_length + y_off), end=(tf, y_off - self._tick_length), stroke_width=width, stroke=color))
+        self.dwg.add(self.dwg.text(t, insert=((ts + tf  - len(t)*self._tick_font_size/2)/2 + 0.5, y_off - 2*self._tick_length), font_family=self._tick_font_family, font_size=self._tick_font_size*0.8))
 
     def addNodeIntervalMark(self, u, v, color='black', width=1):
         ucpt = min(self._nodes[u], self._nodes[v])
@@ -527,13 +518,15 @@ class Drawing(object):
 
         if bordercolor is None:
             bordercolor = color
+        elif borderwidth == 0:
+            borderwidth = 0.5
 
         nu = self.dwg.add(self.dwg.g(class_="node_"+u))
         nctu = self._nodes[u]
         nctv = self._nodes[v]
         t_pos = (nctu-1) * (self._node_unit + self._node_sep)
         d_pos = (nctv-1) * (self._node_unit + self._node_sep)
-        self.dwg.add(self.dwg.rect(insert=(self._offset_x+b*self._time_unit, t_pos+self._node_unit/2-0.5+self._offset_y), size=((e-b)*self._time_unit, d_pos+1), fill=color, stroke=bordercolor, stroke_width=borderwidth, fill_opacity=opacity))
+        self.dwg.add(self.dwg.rect(insert=(self._offset_x+b*self._time_unit, t_pos+self._node_unit/2-0.5+self._offset_y), size=((e-b)*self._time_unit, d_pos-t_pos+1), fill=color, stroke=bordercolor, stroke_width=borderwidth, fill_opacity=opacity))
 
     def __addTime(self, t, label="", width=1, color='black', opacity=0.8):
         y = (self._node_cpt) * (self._node_unit + self._node_sep) + self._offset_y
@@ -614,28 +607,25 @@ class Drawing(object):
         for t, v in vals:
             x = t*self._time_unit + self._offset_x + 0.5
             self.dwg.add(self.dwg.line(start=(x, y), end=(x, y + self._tick_length), stroke_width=str(self._tick_width), stroke='black'))
-            self.dwg.add(self.dwg.text(str(v), insert=(x-self._tick_font_size/4 - 0.2, y + self._tick_length + self._tick_font_size - 0.5), font_family=self._tick_font_family, font_size=self._tick_font_size, fill=self._tick_font_color))
+            self.dwg.add(self.dwg.text(str(v), insert=(x - (self._tick_font_size/4 + 0.2)*len(str(v)), y + self._tick_length + self._tick_font_size - 0.5), font_family=self._tick_font_family, font_size=self._tick_font_size, fill=self._tick_font_color))
         self.dwg.add(self.dwg.text('time', insert=(self._omega*self._time_unit + self._offset_x, y + self._tick_length + self._tick_font_size - 0.5), font_family=self._tick_font_family, font_size=self._tick_font_size*0.8, fill=self._tick_font_color))
         # set marker (start, mid and end markers are the same)
 
     def __del__(self):
-        # Adds white rectangle in background around first node (for EPS bounding box)
-        #self.addRectangle(self._first_node, self._first_node, self._alpha, self._omega, width=300,depth=60, color=7)
-        pass
+        if not (hasattr(self, 'saved_') and self.saved_):
+            self.save()
 
     def save(self):
-        if hasattr(self, '__add_tl') is not None:
+        if self.__add_tl is not None:
             self.__addTimeLine(**self.__add_tl)
         for args, kargs in self.__add_tm:
-            self.__addTime(*args, **kargs) 
-        self.dwg.save() 
+            self.__addTime(*args, **kargs)
+        self.dwg.save()
+        self.saved_ = True
 
 # main
 if __name__ == '__main__':
-
-    # s = Drawing()
-    # s = Drawing(alpha=0, omega=10)
-    s = Drawing("out.svg", alpha=0, omega=10)
+    s = Drawing(alpha=0, omega=10)
 
     s.addColor("grey", "#888888")
     s.addColor("red", "#ff0000")
@@ -656,7 +646,7 @@ if __name__ == '__main__':
     s.addPath([(2, "u", "v"), (4, "v", "x")], 1, 9, width=1)   
     s.addPath([(2, "y", "x")], 1, 4, gamma=0.5, color='pink', width=1)
     s.addLink("u", "v", 1, 4, height=0.4)
-    s.addLink("u", "v", 5, 7)
+    s.addLink("u", "v", 7, 8)
     s.addLink("v", "x", 3, 4)
 
     s.addTime(4, label="u", width=1, color='black')    
@@ -664,4 +654,3 @@ if __name__ == '__main__':
     s.addTimeNodeMark(4, "y", width=0.5)
     s.addNodeIntervalMark("u", "x", color='black')
     s.save()
-    #s.save(addTimeLine=dict(ticks=2))
