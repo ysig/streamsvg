@@ -1,10 +1,6 @@
-from Drawing import *
+from streamsvg import Drawing
 
 s = Drawing()
-
-s.addColor("grey", "#BBBBBB")
-s.addColor("white", "#FFFFFF")
-s.addColor("red", "#ff0000")
 
 s.addNode("a",[(2,5)])
 s.addNode("b",[(1,8)])

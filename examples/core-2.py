@@ -1,4 +1,4 @@
-from Drawing import *
+from streamsvg import Drawing
 
 s = Drawing(alpha=0, omega=10)
 
@@ -7,11 +7,11 @@ s.addNode("b",[(4,5),(7,9)])
 s.addNode("c",[(4,5),(7,9)])
 s.addNode("d",[(4,5),(7,9)])
 
-s.addLink("a", "c", 4, 5, height=0.40, curving=0.3)
+s.addLink("a", "c", 4, 5, height=0.40, curving=0.5)
 s.addLink("c", "d", 4, 5)
 s.addLink("c", "d", 7, 9)
-s.addLink("b", "d", 4, 5, height=0.40, curving=0.3)
-s.addLink("b", "d", 7, 9, height=0.40, curving=0.3)
+s.addLink("b", "d", 4, 5, height=0.40, curving=0.5)
+s.addLink("b", "d", 7, 9, height=0.55, curving=0.4)
 s.addLink("a", "b", 4, 5)
 s.addLink("b", "c", 7, 9)
 

@@ -1,4 +1,4 @@
-from Drawing import *
+from streamsvg import Drawing
 
 #s = Drawing(alpha=0, omega=5)
 s = Drawing(alpha=1, omega=9)

@@ -1,4 +1,4 @@
-from Drawing import *
+from streamsvg import Drawing
 
 s = Drawing()
 
@@ -18,5 +18,5 @@ s.addLink("b", "c", 8, 8)
 
 s.addLink("a", "c", 5, 5)
 
-s.addParameter("D", 2.2)
+s.addParameter(0, 2, "a", 2)
 s.addTimeLine(ticks=2)

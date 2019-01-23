@@ -1,4 +1,4 @@
-from Drawing import *
+from streamsvg import Drawing
 
 s = Drawing()
 

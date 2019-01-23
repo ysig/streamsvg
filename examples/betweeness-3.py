@@ -1,4 +1,4 @@
-from Drawing import *
+from streamsvg import Drawing
 
 sg = Drawing(alpha=0, omega=5)
 
@@ -9,6 +9,6 @@ sg.addNode("w")
 sg.addLink("u", "v", 1, 3)
 sg.addLink("v", "w", 2, 4)
 
-sg.addPath(((2.5,"u","v"), (2.5,"v","w")), 2.5, 2.5, color=11, width=6)
+sg.addPath(((2.5,"u","v"), (2.5,"v","w")), 2.5, 2.5, color='blue', width=2)
 
 sg.addTimeLine()

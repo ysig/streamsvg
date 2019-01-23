@@ -1,10 +1,6 @@
-from Drawing import *
+from streamsvg import Drawing
 
 s = Drawing()
-
-s.addColor("grey", "#BBBBBB")
-s.addColor("white", "#FFFFFF")
-s.addColor("red", "#ff0000")
 
 s.addNode("a", [(0,10)])
 s.addNode("b", [(0,4),(5,10)])
@@ -17,8 +13,8 @@ s.addLink("b","c",6,9)
 s.addLink("b","d",2,3,height=0.4)
 s.addLink("a","c",4.5,7.5,height=0.4)
 
-s.addRectangle("a","c",2,4,color=11)
-s.addRectangle("b","d",7,8,color="red")
+s.addRectangle("a","c",2,4,color="blue")
+s.addRectangle("b","d",7,8,color="#ff0000")
 
 s.addTimeLine(ticks=2)
 

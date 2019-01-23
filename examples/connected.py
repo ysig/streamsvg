@@ -1,8 +1,6 @@
-from Drawing import *
+from streamsvg import Drawing
 
 s = Drawing()
-
-s.addColor("tRed", "#FF9896")
 
 s.addNode("a")
 s.addNode("b", [(0,4),(5,10)])
@@ -16,25 +14,25 @@ s.addLink("a", "b", 7, 8)
 s.addLink("a", "b", 6, 9)
 
 
-s.addRectangle("a", "a", 0, 1, color=-1, bordercolor="tRed", border="lrtb")
-s.addRectangle("b", "b", 0, 1, color=-1, bordercolor="tRed", border="lrtb")
+s.addRectangle("a", "a", 0, 1, color=-1, bordercolor="#FF9896")
+s.addRectangle("b", "b", 0, 1, color=-1, bordercolor="#FF9896")
 
-s.addRectangle("a", "b", 1, 2, color=-1, bordercolor="tRed", border="lrtb")
-s.addRectangle("d", "d", 1, 2, color=-1, bordercolor="tRed", border="lrtb")
+s.addRectangle("a", "b", 1, 2, color=-1, bordercolor="#FF9896")
+s.addRectangle("d", "d", 1, 2, color=-1, bordercolor="#FF9896")
 
-s.addRectangle("a", "d", 2, 3, color=-1, bordercolor="tRed", border="lrtb")
+s.addRectangle("a", "d", 2, 3, color=-1, bordercolor="#FF9896")
 
-s.addRectangle("a", "a", 3, 4.5, color=-1, bordercolor="tRed", border="lrtb")
-s.addRectangle("b", "b", 3, 4, color=-1, bordercolor="tRed", border="lrtb")
-s.addRectangle("c", "c", 4, 4.5, color=-1, bordercolor="tRed", border="lrtb")
+s.addRectangle("a", "a", 3, 4.5, color=-1, bordercolor="#FF9896")
+s.addRectangle("b", "b", 3, 4, color=-1, bordercolor="#FF9896")
+s.addRectangle("c", "c", 4, 4.5, color=-1, bordercolor="#FF9896")
 
-s.addRectangle("a", "c", 4.5, 6, color=-1, bordercolor="tRed", border="lrtb")
-s.addRectangle("b", "b", 5, 6, color=-1, bordercolor="tRed", border="lrtb")
+s.addRectangle("a", "c", 4.5, 6, color=-1, bordercolor="#FF9896")
+s.addRectangle("b", "b", 5, 6, color=-1, bordercolor="#FF9896")
 
-s.addRectangle("a", "c", 6, 8, color=-1, bordercolor="tRed", border="lrtb")
-s.addRectangle("a", "a", 8, 10, color=-1, bordercolor="tRed", border="lrtb")
-s.addRectangle("b", "c", 8, 9, color=-1, bordercolor="tRed", border="lrtb")
-s.addRectangle("b", "b", 9, 10, color=-1, bordercolor="tRed", border="lrtb")
+s.addRectangle("a", "c", 6, 8, color=-1, bordercolor="#FF9896")
+s.addRectangle("a", "a", 8, 10, color=-1, bordercolor="#FF9896")
+s.addRectangle("b", "c", 8, 9, color=-1, bordercolor="#FF9896")
+s.addRectangle("b", "b", 9, 10, color=-1, bordercolor="#FF9896")
 
 
 s.addTimeLine()

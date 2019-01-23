@@ -1,10 +1,10 @@
-from Drawing import *
+from streamsvg import Drawing
 
 sg = Drawing()
 
-sg.addNode("A", [(0,3),(7,10)], color=27)
-sg.addNode("B", [(2,6),(8,10)], color=11)
-sg.addNode("C", [(0,8)], color=14)
+sg.addNode("A", [(0,3),(7,10)], color='pink')
+sg.addNode("B", [(2,6),(8,10)], color='blue')
+sg.addNode("C", [(0,8)], color='green')
 
 sg.addLink("A", "B", 2, 3)
 sg.addLink("A", "B", 9, 10)

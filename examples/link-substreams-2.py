@@ -1,4 +1,4 @@
-from Drawing import *
+from streamsvg import Drawing
 
 sg = Drawing(alpha=0, omega=11)
 sg.addNode("a",[(1,4)])

@@ -1,7 +1,6 @@
-from Drawing import *
+from streamsvg import Drawing
 
 s = Drawing(alpha=0, omega=8)
-s.addColor("red", "#FF0000")
 
 s.addNode("u")
 s.addNode("x")
@@ -24,7 +23,7 @@ s.addLink("y", "w", 6, 7)
 #s.addTime(6, label="f'")
 #s.addTime(7, label="f")
 
-s.addPath(((1,"u","x"), (2.5,"x","v"), (4.5, "v", "y"), (6, "y", "w")), 1, 6, color=11, width=6)
-s.addTimeNodeMark(3.5,"v",color="red",width=4)
+s.addPath(((1,"u","x"), (2.5,"x","v"), (4.5, "v", "y"), (6, "y", "w")), 1, 6, color='blue', width=2)
+s.addTimeNodeMark(3.5,"v",color="#FF0000",width=1)
 
 s.addTimeLine(ticks=2)

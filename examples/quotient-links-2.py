@@ -2,14 +2,14 @@
 # Dark green = 12
 # Purple = 21
 # Pink = 27
-from Drawing import *
+from streamsvg import Drawing
 
 s = Drawing()
 
-s.addNode("A", color=12)
-s.addNode("B", color=10)
-s.addNode("C", color=27)
-s.addNode("D", color=21)
+s.addNode("A", color='green')
+s.addNode("B", color='blue')
+s.addNode("C", color='orange')
+s.addNode("D", color='magenta')
 
 s.addLink("A", "B", 2, 4)
 s.addLink("A", "C", 3, 4, height=0.4)
